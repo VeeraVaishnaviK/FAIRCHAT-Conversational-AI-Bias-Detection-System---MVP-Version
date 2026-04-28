@@ -34,11 +34,13 @@ export default function FileUpload({ onUploadSuccess }) {
   }
 
   const handleFile = async (file) => {
+    // Validate file type
     if (!file.name.toLowerCase().endsWith('.csv')) {
       setError('Please upload a CSV file')
       return
     }
 
+    // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
       setError('File size must be less than 10MB')
       return
@@ -75,22 +77,23 @@ export default function FileUpload({ onUploadSuccess }) {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-xl mx-auto">
       {/* Drop Zone */}
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={() => !uploading && fileInputRef.current?.click()}
-        className={`relative flex flex-col items-center justify-center cursor-pointer min-h-[180px] p-8 text-center transition-all duration-500 rounded-[22px] ${
-          isDragging ? 'shadow-glow-lg border-indigo-500/50 scale-[1.02]' : 'border-white/5 hover:border-white/10'
-        }`}
+        onClick={() => fileInputRef.current?.click()}
+        className="relative cursor-pointer rounded-2xl p-10 text-center transition-all duration-300"
         style={{
-          background: isDragging ? 'rgba(99, 102, 241, 0.05)' : 'transparent',
-          border: '1.5px solid',
-          borderColor: isDragging ? 'rgba(99, 102, 241, 0.5)' : 'rgba(255, 255, 255, 0.08)',
+          background: isDragging
+            ? 'rgba(99, 102, 241, 0.08)'
+            : 'rgba(255, 255, 255, 0.02)',
+          border: isDragging
+            ? '2px dashed #6366f1'
+            : '2px dashed rgba(255, 255, 255, 0.12)',
+          boxShadow: isDragging ? '0 0 40px rgba(99, 102, 241, 0.15)' : 'none',
         }}
-        id="file-upload-zone"
       >
         <input
           ref={fileInputRef}
@@ -98,43 +101,62 @@ export default function FileUpload({ onUploadSuccess }) {
           accept=".csv"
           onChange={handleFileSelect}
           className="hidden"
+          id="csv-upload-input"
         />
+
+        {/* Upload Icon */}
+        <div className="mb-4">
+          <div
+            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl text-3xl"
+            style={{
+              background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(6, 182, 212, 0.15))',
+              border: '1px solid rgba(99, 102, 241, 0.2)',
+            }}
+          >
+            {uploading ? '⏳' : '📁'}
+          </div>
+        </div>
 
         {!uploading ? (
           <>
-            <div className="w-12 h-12 bg-indigo-500/10 rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-110">
-              <span className="text-xl">📄</span>
-            </div>
-            <p className="text-sm font-semibold text-white/90 mb-1">
-              {isDragging ? 'Drop it here!' : 'Click or drag dataset to analyze'}
+            <p className="text-lg font-semibold mb-1" style={{ color: '#f1f5f9' }}>
+              Drop your CSV file here
             </p>
-            <p className="text-[11px] font-medium text-slate-500 uppercase tracking-widest">
-              CSV Format Required &bull; Max 10MB
+            <p className="text-sm" style={{ color: '#64748b' }}>
+              or <span style={{ color: '#818cf8' }}>click to browse</span> • Max 10MB
             </p>
           </>
         ) : (
-          <div className="w-full max-w-xs animate-pulse">
-            <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-3">
-              Processing {fileName}...
+          <>
+            <p className="text-lg font-semibold mb-2" style={{ color: '#f1f5f9' }}>
+              Uploading {fileName}...
             </p>
-            <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+
+            {/* Progress Bar */}
+            <div className="w-full h-2 rounded-full overflow-hidden mt-3" style={{
+              background: 'rgba(255, 255, 255, 0.06)',
+            }}>
               <div
-                className="h-full bg-indigo-500 transition-all duration-300"
-                style={{ width: `${progress}%` }}
+                className="h-full rounded-full transition-all duration-300"
+                style={{
+                  width: `${progress}%`,
+                  background: 'linear-gradient(90deg, #6366f1, #06b6d4)',
+                  boxShadow: '0 0 10px rgba(99, 102, 241, 0.5)',
+                }}
               />
             </div>
-            <p className="text-[10px] mt-2 font-medium text-slate-500">
-              {progress}% Analyzed
+            <p className="text-xs mt-2" style={{ color: '#64748b' }}>
+              {progress}% complete
             </p>
-          </div>
+          </>
         )}
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="mt-4 p-3 rounded-xl text-xs font-semibold animate-fade-in text-center" style={{
-          background: 'rgba(244, 63, 94, 0.08)',
-          border: '1px solid rgba(244, 63, 94, 0.15)',
+        <div className="mt-4 p-3 rounded-xl text-sm animate-fade-in" style={{
+          background: 'rgba(244, 63, 94, 0.1)',
+          border: '1px solid rgba(244, 63, 94, 0.2)',
           color: '#fb7185',
         }}>
           ⚠️ {error}

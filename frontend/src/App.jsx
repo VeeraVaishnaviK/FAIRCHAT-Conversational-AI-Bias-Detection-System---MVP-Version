@@ -12,10 +12,8 @@ function App() {
 
   return (
     <div className="min-h-screen relative">
-      {/* Animated background highlights */}
-      <div className="bg-glow bg-glow-1" />
-      <div className="bg-glow bg-glow-2" />
-      <div className="bg-glow bg-glow-3" />
+      {/* Animated background */}
+      <div className="bg-gradient-animated" />
 
       {/* Navigation */}
       <Navbar />
