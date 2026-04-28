@@ -11,15 +11,17 @@ function App() {
   const [analysisResult, setAnalysisResult] = useState(null)
 
   return (
-    <div className="min-h-screen relative">
-      {/* Animated background */}
-      <div className="bg-gradient-animated" />
+    <div className="min-h-screen relative overflow-x-hidden">
+      {/* Premium Background */}
+      <div className="bg-mesh" />
+      <div className="bg-blob top-[-100px] left-[-100px]" />
+      <div className="bg-blob bottom-[-100px] right-[-100px] animation-delay-2000" style={{ animationDirection: 'reverse' }} />
 
       {/* Navigation */}
       <Navbar />
 
       {/* Main Content */}
-      <main className="pt-20">
+      <main className="pt-24 pb-12 relative z-10">
         <Routes>
           <Route
             path="/"
