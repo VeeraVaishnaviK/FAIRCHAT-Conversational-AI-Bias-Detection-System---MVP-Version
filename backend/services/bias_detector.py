@@ -44,9 +44,9 @@ def detect_categorical_columns(df: pd.DataFrame) -> list:
     """
     categorical = []
     for col in df.columns:
-        if df[col].dtype == "object" or df[col].dtype.name == "category":
+        if pd.api.types.is_object_dtype(df[col]) or pd.api.types.is_categorical_dtype(df[col]):
             categorical.append(col)
-        elif df[col].dtype in ["int64", "int32", "float64"]:
+        elif pd.api.types.is_numeric_dtype(df[col]):
             # Low cardinality numeric columns may be encoded categories
             if df[col].nunique() <= 10:
                 categorical.append(col)
@@ -133,14 +133,16 @@ def calculate_demographic_parity(
         groups = df.groupby(sensitive_col)[target_col]
 
         # Handle both numeric and string target columns
-        target_values = df[target_col].unique()
+        target_values = df[target_col].dropna().unique()
+        if len(target_values) == 0:
+            raise ValueError(f"Target column '{target_col}' has no valid values.")
 
-        if df[target_col].dtype in ["int64", "int32", "float64"]:
+        if pd.api.types.is_numeric_dtype(df[target_col]):
             # Numeric: assume 1 = positive
             positive_rates = groups.mean()
         else:
             # String: assume first value alphabetically or most common = positive
-            positive_value = sorted(target_values)[0]
+            positive_value = sorted([str(v) for v in target_values])[0]
             positive_rates = groups.apply(
                 lambda x: (x == positive_value).mean()
             )
@@ -148,6 +150,14 @@ def calculate_demographic_parity(
         rates_dict = {str(k): round(v, 4) for k, v in positive_rates.items()}
 
         # Parity gap = max rate - min rate
+        if positive_rates.empty:
+             return sanitize_for_json({
+                "sensitive_column": sensitive_col,
+                "target_column": target_col,
+                "parity_gap": 0,
+                "has_disparity": False,
+            })
+
         max_rate = positive_rates.max()
         min_rate = positive_rates.min()
         parity_gap = max_rate - min_rate
@@ -158,8 +168,8 @@ def calculate_demographic_parity(
             "group_positive_rates": rates_dict,
             "parity_gap": round(float(parity_gap), 4),
             "has_disparity": bool(float(parity_gap) > 0.1),
-            "most_favored_group": str(positive_rates.idxmax()),
-            "least_favored_group": str(positive_rates.idxmin()),
+            "most_favored_group": str(positive_rates.idxmax()) if not positive_rates.empty else "N/A",
+            "least_favored_group": str(positive_rates.idxmin()) if not positive_rates.empty else "N/A",
         })
 
     except Exception as e:

@@ -20,7 +20,9 @@ export const apiService = {
   },
 
   analyzeBias: async (filename: string) => {
-    const response = await api.get<AnalysisResult>(`/analyze?filename=${filename}`);
+    const response = await api.get<AnalysisResult>('/analyze', {
+      params: { filename }
+    });
     return response.data;
   },
 
