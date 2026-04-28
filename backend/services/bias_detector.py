@@ -13,7 +13,7 @@ from typing import Optional
 def sanitize_for_json(obj):
     """
     Recursively convert numpy types to native Python types for JSON serialisation.
-    Fixes numpy.bool_, numpy.int64, numpy.float64 serialisation errors.
+    Fixes numpy.bool_, numpy.int64, numpy.float64 serialisation errors and NaN/Inf.
     """
     if isinstance(obj, dict):
         return {k: sanitize_for_json(v) for k, v in obj.items()}
@@ -24,9 +24,16 @@ def sanitize_for_json(obj):
     elif isinstance(obj, (np.integer,)):
         return int(obj)
     elif isinstance(obj, (np.floating,)):
-        return float(obj)
+        val = float(obj)
+        if np.isnan(val) or np.isinf(val):
+            return 0.0
+        return val
     elif isinstance(obj, np.ndarray):
-        return obj.tolist()
+        return [sanitize_for_json(x) for x in obj.tolist()]
+    elif isinstance(obj, float):
+        if np.isnan(obj) or np.isinf(obj):
+            return 0.0
+        return obj
     return obj
 
 
