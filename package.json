@@ -1,0 +1,11 @@
+{
+  "name": "fairchat-root",
+  "version": "1.0.0",
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && venv\\Scripts\\activate && uvicorn main:app --reload",
+    "dev:backend:bash": "cd backend && source venv/Scripts/activate && uvicorn main:app --reload",
+    "install:all": "cd frontend && npm install && cd ../backend && pip install -r requirements.txt"
+  },
+  "dependencies": {}
+}
