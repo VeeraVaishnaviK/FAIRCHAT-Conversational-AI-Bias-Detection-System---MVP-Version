@@ -103,7 +103,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUpload, isLoading }) => {
               Click to upload or drag and drop
             </p>
             <p className="text-sm text-slate-500">
-              CSV files only (max. 10MB)
+              CSV files only (max. 100MB)
             </p>
           </label>
         ) : (
